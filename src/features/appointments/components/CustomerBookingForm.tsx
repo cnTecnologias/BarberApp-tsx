@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getAvailableSlots } from "../utils/timeUtils";
 import { useAppointments } from "../api/useAppointments";
+import { DateStripSelector } from "./DateStripSelector";
+import { TimeSlotGrid } from "./TimeSlotGrid";
 
 interface Service {
   id: string;
@@ -11,8 +12,18 @@ interface Service {
 
 // Mock de servicios. Esto idealmente viene de tu base de datos.
 const MOCK_SERVICES = [
-  { id: "1", name: "Corte Clásico", durationMinutes: 30, price: 5000 },
-  { id: "2", name: "Corte + Barba", durationMinutes: 60, price: 7500 },
+  {
+    id: "service-pelo",
+    name: "Corte Clásico",
+    durationMinutes: 30,
+    price: 5000,
+  },
+  {
+    id: "service-barba",
+    name: "Corte + Barba",
+    durationMinutes: 60,
+    price: 7500,
+  }, // Asegurate que este también exista en D1
 ];
 
 export const CustomerBookingForm = () => {
@@ -22,67 +33,59 @@ export const CustomerBookingForm = () => {
   const [selectedTime, setSelectedTime] = useState("");
   const [customerInfo, setCustomerInfo] = useState({ fullName: "", phone: "" });
 
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-  const { createAppointment, error: apiError } = useAppointments();
+  // Nos traemos la función GET, los turnos (appointments) y el isLoading real
+  const {
+    createAppointment,
+    fetchDailyAppointments,
+    appointments,
+    isLoading,
+    error: apiError,
+  } = useAppointments();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Efecto que simula traer los turnos ocupados cuando elige una fecha
+  // PASO2: Si el cliente eligió servicio y fecha, buscamos los turnos de ese día
   useEffect(() => {
     if (step === 2 && selectedDate && selectedService) {
-      setIsLoadingSlots(true);
-      // Acá harías el fetch a tu endpoint GET /api/appointments?date=selectedDate
-      // Simulamos que el turno de las 10:00 a 10:30 está ocupado
-      setTimeout(() => {
-        const mockBooked = [
-          {
-            startTime: "2026-03-11T10:00:00Z",
-            endTime: "2026-03-11T10:30:00Z",
-          },
-        ];
-        const slots = getAvailableSlots(
-          mockBooked,
-          selectedService.durationMinutes,
-        );
-        setAvailableSlots(slots);
-        setIsLoadingSlots(false);
-      }, 500);
+      // Hardcodeamos el barbero por ahora. Si cambia la fecha, trae los datos nuevos.
+      fetchDailyAppointments("barber-123", selectedDate);
+      setSelectedTime(""); // Limpiamos la hora por si cambió de día
     }
-  }, [step, selectedDate, selectedService]);
+  }, [step, selectedDate, selectedService, fetchDailyAppointments]);
 
   const handleConfirm = async () => {
     if (!selectedService || !selectedDate || !selectedTime) return;
 
     setIsSubmitting(true);
     try {
-      // Armamos la fecha ISO combinando el input de fecha y la hora elegida
-      const startIso = new Date(
-        `${selectedDate}T${selectedTime}:00Z`,
-      ).toISOString();
-
-      // Calculamos el fin sumando los minutos del servicio
-      const endDate = new Date(startIso);
-      endDate.setUTCMinutes(
-        endDate.getUTCMinutes() + selectedService.durationMinutes,
+      const localStartTime = new Date(`${selectedDate}T${selectedTime}:00`);
+      //Calculamos la hora de fin sumando los minutos localmente
+      const localEndTime = new Date(localStartTime);
+      localEndTime.setMinutes(
+        localEndTime.getMinutes() + selectedService.durationMinutes,
       );
+      // Pasamos todo a ISO (JavaScript ajustará el UTC automáticamente) para la base de datos
+      const startIso = localStartTime.toISOString();
+      const endIso = localEndTime.toISOString();
+
+      const cleanPhone = customerInfo.phone.replace(/\D/g, "");
 
       await createAppointment({
         customerInfo: {
           fullName: customerInfo.fullName,
-          phone: customerInfo.phone,
+          phone: cleanPhone,
         },
-        barberId: "barber-123", // Hardcodeado por ahora
-        serviceIds: ["service-pelo"],
+        barberId: "barber-123",
+        serviceIds: [selectedService.id], // OJO ACA: en el tuyo decía "service-pelo" a mano. Ahora usa el ID real del mock
         startTime: startIso,
-        endTime: endDate.toISOString(),
+        endTime: endIso,
         status: "PENDING",
         totalPrice: selectedService.price,
       });
 
       alert("¡Turno confirmado con éxito!");
-      setStep(1); // Resetea el wizard
+      setStep(1);
     } catch (err) {
-      // Si salta la Race Condition (el 409), el hook tira el error acá.
       alert(
         `Error: ${err instanceof Error ? err.message : "No se pudo reservar"}`,
       );
@@ -128,38 +131,40 @@ export const CustomerBookingForm = () => {
 
       {/* PASO 2: Elegir Fecha y Hora */}
       {step === 2 && (
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold text-gray-800">Elegí tu horario</h2>
-          <input
-            type="date"
-            className="text-gray-700 w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 outline-none"
-            onChange={(e) => setSelectedDate(e.target.value)}
+        <div className="mb-6">
+          <label className="block text-sm font-bold text-gray-700 mb-3">
+            ¿Qué día venís?
+          </label>
+          <DateStripSelector
+            selectedDate={selectedDate}
+            onSelect={(date) => setSelectedDate(date)}
+            daysToShow={21} // Le damos 3 semanas de margen
           />
 
           {selectedDate && (
-            <div className="mt-4">
-              <h3 className="text-sm font-bold text-gray-500 mb-3">
-                Horarios Disponibles
-              </h3>
-              {isLoadingSlots ? (
-                <div className="text-center text-gray-400">
-                  Calculando disponibilidad...
+            <div className="mt-6">
+              <label className="block text-sm font-bold text-gray-700 mb-3">
+                ¿A qué hora?
+              </label>
+
+              {/* LA MAGIA SUCEDE ACÁ: Si está cargando muestra texto, si no, muestra la grilla inteligente */}
+              {isLoading ? (
+                <div className="text-center text-sm font-bold text-blue-600 animate-pulse py-6">
+                  Verificando agenda...
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
-                  {availableSlots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => {
-                        setSelectedTime(time);
-                        setStep(3);
-                      }}
-                      className="p-3 border border-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-blue-600 hover:text-white transition-colors"
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
+                <TimeSlotGrid
+                  selectedDate={selectedDate}
+                  appointments={appointments} // Los turnos reales que trajo el hook
+                  serviceDurationMinutes={
+                    selectedService?.durationMinutes || 30
+                  }
+                  selectedTime={selectedTime}
+                  onSelectTime={(time) => {
+                    setSelectedTime(time);
+                    setStep(3); // Avanza automático al elegir la hora
+                  }}
+                />
               )}
             </div>
           )}
@@ -185,7 +190,7 @@ export const CustomerBookingForm = () => {
             }
           />
           <input
-            type="tel"
+            type="number"
             placeholder="Teléfono (WhatsApp)"
             className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 outline-none text-gray-700"
             onChange={(e) =>

@@ -46,7 +46,7 @@ export const DailyAgenda: React.FC<DailyAgendaProps> = ({
   const getAppointmentsForSlot = (slotTime: string) => {
     return appointments.filter((app) => {
       const appDate = new Date(app.startTime);
-      const appTime = `${appDate.getUTCHours().toString().padStart(2, "0")}:${appDate.getUTCMinutes().toString().padStart(2, "0")}`;
+      const appTime = `${appDate.getHours().toString().padStart(2, "0")}:${appDate.getMinutes().toString().padStart(2, "0")}`;
       return appTime === slotTime;
     });
   };
@@ -101,16 +101,26 @@ export const DailyAgenda: React.FC<DailyAgendaProps> = ({
                         className={`p-3 rounded-lg border-l-4 shadow-sm cursor-pointer transition-transform hover:-translate-y-0.5 ${statusColors[app.status]}`}
                       >
                         <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-bold text-sm">
-                              Cliente ID: {app.customerId}
+                          <div className="flex flex-col gap-0.5">
+                            {/* 1. Nombre del cliente en grande */}
+                            <p className="font-bold text-sm text-gray-900 capitalize">
+                              {app.customerName || "Cliente sin nombre"}
                             </p>
-                            {/* Acá iría el nombre del servicio cruzando datos, por ahora mostramos el precio total para el cajero */}
-                            <p className="text-xs mt-1 opacity-90">
-                              Total: ${app.totalPrice}
+
+                            {/* 2. Lista de servicios elegidos */}
+                            <p className="text-xs font-semibold text-gray-700">
+                              {app.services?.map((s) => s.name).join(" + ") ||
+                                "Servicio no especificado"}
+                            </p>
+
+                            {/* 3. Teléfono limpio y Precio total */}
+                            <p className="text-xs mt-1 text-gray-500 font-medium">
+                              📱 {app.customerId.replace("cust-", "")} • 💰 $
+                              {app.totalPrice}
                             </p>
                           </div>
-                          <span className="text-[10px] uppercase tracking-wider font-bold opacity-80">
+
+                          <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 border border-current px-1.5 py-0.5 rounded-md bg-white bg-opacity-20 mt-1">
                             {app.status}
                           </span>
                         </div>

@@ -44,11 +44,20 @@ export const AdminView = () => {
         <h1 className="text-2xl font-black text-gray-800">Panel de Control</h1>
         <button
           onClick={() => fetchDailyAppointments(BARBER_ID, TODAY)}
-          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold"
+          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold cursor-pointer"
         >
           ↻ Refrescar
         </button>
       </div>
+      <button
+        onClick={() => {
+          localStorage.removeItem("evonec_admin_token");
+          window.location.href = "/login"; // Forzamos recarga dura para limpiar estados
+        }}
+        className="text-red-500 font-bold text-sm cursor-pointer"
+      >
+        Cerrar Sesión
+      </button>
 
       <DailyAgenda
         appointments={appointments}

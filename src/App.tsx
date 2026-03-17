@@ -1,6 +1,12 @@
 import { useState } from "react";
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+const AdminLogin = React.lazy(() =>
+  import("./features/appointments/components/AdminLogin").then((m) => ({
+    default: m.AdminLogin,
+  })),
+);
 
 // Lazy Loading: El código de estas pantallas solo se descarga si el usuario entra a esa URL
 const CustomerBookingForm = React.lazy(() =>
@@ -39,14 +45,16 @@ function App() {
               </div>
             }
           />
-
+          <Route path="/login" element={<AdminLogin />} />
           {/* Zona Privada: La caja registradora conectada a Cloudflare */}
           <Route
             path="/admin"
             element={
-              <div className="min-h-screen bg-gray-100 py-6 px-4">
-                <AdminView />
-              </div>
+              <ProtectedRoute>
+                <div className="min-h-screen bg-gray-100 py-6 px-4">
+                  <AdminView />
+                </div>
+              </ProtectedRoute>
             }
           />
 

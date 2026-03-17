@@ -36,11 +36,19 @@ export const useAppointments = () => {
       setError(null);
 
       try {
-        // Reemplazar con tu URL real del Cloudflare Worker / API
+        // Buscamos la pulsera en el navegador
+        const token = localStorage.getItem("evonec_admin_token");
+        //URL del Cloudflare Worker / API
         const response = await fetch(
           `https://worker-barberias.fedepedano2003.workers.dev/api/appointments?barberId=${barberId}&date=${dateIso}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
-
+        if (response.status === 401)
+          throw new Error("Sesión expirada o no autorizada.");
         if (!response.ok) {
           throw new Error("Error al cargar la agenda. Actualizá la página.");
         }
@@ -118,15 +126,24 @@ export const useAppointments = () => {
       newStatus: (typeof AppointmentStatus)[keyof typeof AppointmentStatus],
     ) => {
       try {
+        const token = localStorage.getItem("evonec_admin_token");
         const response = await fetch(
           `https://worker-barberias.fedepedano2003.workers.dev/api/appointments/${id}/status`,
           {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({ status: newStatus }),
           },
         );
 
+        if (response.status === 401) {
+          throw new Error(
+            "Sesión expirada. Por favor, volvé a iniciar sesión.",
+          );
+        }
         if (!response.ok) {
           throw new Error("No se pudo actualizar el estado.");
         }
