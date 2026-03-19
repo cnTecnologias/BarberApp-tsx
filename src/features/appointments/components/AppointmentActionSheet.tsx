@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { type Appointment, AppointmentStatus } from "../types";
 
+// Este componente es un Action Sheet que se muestra al hacer click en un turno dentro de la DailyAgenda.
+// Permite cambiar el estado del turno a "Completado", "No Show" o "Cancelado", y también muestra un resumen rápido del turno (ticket UX) para facilitar la gestión sin tener que entrar a cada turno.
 interface ActionSheetProps {
   appointment: Appointment | null;
   isOpen: boolean;
@@ -45,18 +47,18 @@ export const AppointmentActionSheet: React.FC<ActionSheetProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white w-full sm:w-[400px] rounded-2xl p-6 shadow-2xl transform transition-transform"
+        className="bg-white w-full sm:w-[400px] rounded-2xl p-6 shadow-2xl transform transition-transform dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-black text-gray-900 mb-4">
+        <h3 className="text-xl font-black text-gray-900 mb-4 dark:text-white transition-colors">
           Gestionar Turno
         </h3>
 
         {/* TARJETA DE RESUMEN (TICKET UX) */}
-        <div className="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6">
+        <div className="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6 dark:bg-gray-900/50 dark:border-gray-700 transition-colors">
           <div className="flex justify-between items-start mb-3 border-b border-gray-200 pb-3">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 capitalize leading-tight">
+              <h3 className="text-lg font-bold text-gray-900 capitalize leading-tight dark:text-white transition-colors">
                 {appointment.customerName || "Cliente sin nombre"}
               </h3>
               {/* Acceso rápido a WhatsApp */}
@@ -76,14 +78,14 @@ export const AppointmentActionSheet: React.FC<ActionSheetProps> = ({
 
           <div className="flex justify-between items-end mt-2">
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5 dark:text-gray-200">
                 Servicio
               </p>
-              <p className="text-sm font-semibold text-gray-800">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-400 capitalize">
                 {appointment.services?.map((s) => s.name).join(" + ") ||
                   "Sin servicios"}
               </p>
-              <p className="text-xs font-medium text-gray-500 mt-1">
+              <p className="text-xs font-medium text-gray-500 mt-1 dark:text-gray-200">
                 📅{" "}
                 {new Date(appointment.startTime).toLocaleTimeString("es-AR", {
                   hour: "2-digit",
@@ -94,7 +96,7 @@ export const AppointmentActionSheet: React.FC<ActionSheetProps> = ({
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5 dark:text-gray-200">
                 Total
               </p>
               <p className="text-2xl font-black text-green-600 leading-none">
@@ -147,7 +149,7 @@ export const AppointmentActionSheet: React.FC<ActionSheetProps> = ({
           <button
             disabled={isUpdating}
             onClick={onClose}
-            className="w-full py-3 mt-1 text-gray-400 font-bold hover:text-gray-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className="w-full py-3 mt-1 text-gray-400 font-bold hover:text-gray-800 transition-colors cursor-pointer disabled:cursor-not-allowed dark:hover:text-gray-200"
           >
             Volver
           </button>

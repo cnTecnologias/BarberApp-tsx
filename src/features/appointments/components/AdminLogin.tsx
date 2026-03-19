@@ -42,13 +42,13 @@ export const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-mauve-500 flex items-center justify-center p-4">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full border border-gray-100"
+        className="bg-mauve-900 p-8 rounded-2xl shadow-lg max-w-sm w-full border border-gray-100"
       >
-        <h1 className="text-2xl font-black text-gray-800 mb-2">EVONEC Admin</h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <h1 className="text-2xl font-black text-gray-300 mb-2">EVONEC Admin</h1>
+        <p className="text-sm text-gray-400 mb-6">
           Ingresá tu clave para ver la agenda.
         </p>
 
@@ -58,7 +58,7 @@ export const AdminLogin = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
-          className="w-full p-4 mb-4 border-2 border-gray-200 rounded-xl focus:border-black outline-none text-gray-700 font-bold disabled:bg-gray-100"
+          className="w-full p-4 mb-4 border-2 border-gray-200 rounded-xl focus:border-black outline-none text-gray-400 font-bold disabled:bg-gray-100"
         />
 
         {error && (
@@ -68,7 +68,7 @@ export const AdminLogin = () => {
         <button
           type="submit"
           disabled={isLoading || !password}
-          className="w-full py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
+          className="w-full py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed"
         >
           {isLoading ? "Verificando..." : "Entrar"}
         </button>

@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 
+// Este componente es un selector horizontal de fechas que muestra los próximos días a partir de hoy.
+// Es el primer paso para reservar un turno, y al seleccionar una fecha, se muestra la DailyAgenda correspondiente a ese día.
+
 interface DateStripProps {
   selectedDate: string; // Formato esperado: YYYY-MM-DD
   onSelect: (date: string) => void;

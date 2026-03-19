@@ -3,6 +3,7 @@ import { useAppointments } from "../api/useAppointments";
 import { DailyAgenda } from "./DailyAgenda";
 import { AppointmentActionSheet } from "./AppointmentActionSheet";
 import type { Appointment } from "../types";
+import { ThemeToggle } from "../../../components/ui/ThemeToggle";
 
 export const AdminView = () => {
   const {
@@ -39,9 +40,12 @@ export const AdminView = () => {
     );
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto ">
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-black text-gray-800">Panel de Control</h1>
+        <h1 className="text-2xl font-black dark:text-white text-gray-800">
+          Panel de Control
+        </h1>
+        <ThemeToggle />
         <button
           onClick={() => fetchDailyAppointments(BARBER_ID, TODAY)}
           className="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold cursor-pointer"
@@ -54,13 +58,14 @@ export const AdminView = () => {
           localStorage.removeItem("evonec_admin_token");
           window.location.href = "/login"; // Forzamos recarga dura para limpiar estados
         }}
-        className="text-red-500 font-bold text-sm cursor-pointer"
+        className="text-red-500 font-bold text-sm cursor-pointer mb-4 border border-red-500 px-3 py-1 rounded-lg hover:bg-red-200 transition"
       >
         Cerrar Sesión
       </button>
 
       <DailyAgenda
         appointments={appointments}
+        currentDate={TODAY}
         onTimeSlotClick={(time) =>
           console.log("Acá abrirías un modal para crear turno manual:", time)
         }

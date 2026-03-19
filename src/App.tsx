@@ -51,7 +51,7 @@ function App() {
             path="/admin"
             element={
               <ProtectedRoute>
-                <div className="min-h-screen bg-gray-100 py-6 px-4">
+                <div className="min-h-screen bg-gray-100 py-6 px-4 dark:bg-gray-900 transition-colors duration-300">
                   <AdminView />
                 </div>
               </ProtectedRoute>
